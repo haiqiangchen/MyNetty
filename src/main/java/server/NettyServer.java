@@ -29,20 +29,19 @@ public class NettyServer {
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     protected void initChannel(NioSocketChannel ch){
+                        ch.pipeline().addLast(new FirstServerHandler());
                     }
                 });
         bind(serverBootstrap,port);
     }
     private static void bind(final ServerBootstrap serverBootstrap,final int port){
-        serverBootstrap.bind(port).addListener(new GenericFutureListener<Future<? super Void>>() {
-            public void operationComplete(Future<? super Void> future) throws Exception {
-                if(future.isSuccess()){
-                    System.out.println("端口绑定成功");
-                    log.info(port+"端口被绑定");
-                }else{
-                    System.out.println("端口绑定失败");
-                    bind(serverBootstrap,port+1);
-                }
+        serverBootstrap.bind(port).addListener(future -> {
+            if(future.isSuccess()){
+                System.out.println("端口绑定成功");
+                log.info(port+"端口被绑定");
+            }else{
+                System.out.println("端口绑定失败");
+                bind(serverBootstrap,port+1);
             }
         });
     }
