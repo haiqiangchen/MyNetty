@@ -8,6 +8,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 /**
  * @author haiqiang
  * @date 2018/12/4 14:40
@@ -17,7 +19,7 @@ public class NettyClient {
     private final static String host="127.0.0.1";
     private final static int port=8080;
     //重连接次数
-    private final static int retry=3;
+    private final static int MAX_RETRY=3;
     private final static Logger log= LoggerFactory.getLogger(NettyClient.class);
 
     public static void main(String[] args){
@@ -32,7 +34,7 @@ public class NettyClient {
                     }
                 });
 
-       connect(bootstrap,host,port,retry);
+       connect(bootstrap,host,port,MAX_RETRY);
     }
     private static void connect(Bootstrap bootstrap,String host,int port,int retry){
        bootstrap.connect(host,port) .addListener(future -> {
@@ -42,6 +44,8 @@ public class NettyClient {
                log.error("重连接的次数用光");
            }else {
                log.info("连接失败");
+               int order=(MAX_RETRY-retry)+1;
+               log.info(new Date()+":连接失败，第"+order+"次重连。。。。");
                connect(bootstrap,host,port,retry);
            }
        });
